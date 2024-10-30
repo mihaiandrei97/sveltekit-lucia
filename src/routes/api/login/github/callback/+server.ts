@@ -1,7 +1,7 @@
 import { github } from '$lib/server/oauth';
 import type { OAuth2Tokens } from 'arctic';
 import type { RequestEvent } from './$types';
-import { createSession, setSessionTokenCookie } from '$lib/server/auth';
+import { createSession, generateSessionToken, setSessionTokenCookie } from '$lib/server/auth';
 import { createProviderAccount, findUserByProvider } from '$lib/features/user/queries';
 
 interface GitHubUser {
@@ -56,8 +56,10 @@ export async function GET(event: RequestEvent): Promise<Response> {
     });
 
 	if (existingUser !== null) {
-		const session = await createSession(existingUser.id);
-		setSessionTokenCookie(event, session.id, session.expiresAt);
+		const token = generateSessionToken();
+		const session = await createSession(token, existingUser.id);
+
+		setSessionTokenCookie(event, token, session.expiresAt);
 		return new Response(null, {
 			status: 302,
 			headers: {
@@ -93,9 +95,11 @@ export async function GET(event: RequestEvent): Promise<Response> {
         email
     });
 
-	const session = await createSession(user.id);
-	setSessionTokenCookie(event, session.id, session.expiresAt);
-
+	
+	const token = generateSessionToken();
+	const session = await createSession(token, user.id);
+	setSessionTokenCookie(event, token, session.expiresAt);
+	
 	return new Response(null, {
 		status: 302,
 		headers: {

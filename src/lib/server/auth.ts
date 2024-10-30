@@ -10,14 +10,13 @@ const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
 export const sessionCookieName = 'auth-session';
 
-function generateSessionToken(): string {
+export function generateSessionToken(): string {
 	const bytes = crypto.getRandomValues(new Uint8Array(20));
 	const token = encodeBase32LowerCaseNoPadding(bytes);
 	return token;
 }
 
-export async function createSession(userId: string): Promise<table.InsertSession> {
-	const token = generateSessionToken();
+export async function createSession(token: string, userId: string): Promise<table.InsertSession> {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	const session: table.InsertSession = {
 		id: sessionId,
@@ -32,7 +31,9 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 	await db.delete(table.session).where(eq(table.session.id, sessionId));
 }
 
-export async function validateSession(sessionId: string) {
+export async function validateSession(token: string) {
+	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+
 	const [result] = await db
 		.select({
 			// Adjust user table here to tweak returned data
@@ -42,7 +43,7 @@ export async function validateSession(sessionId: string) {
 		.from(table.session)
 		.innerJoin(table.user, eq(table.session.userId, table.user.id))
 		.where(eq(table.session.id, sessionId));
-
+	
 	if (!result) {
 		return { session: null, user: null };
 	}
@@ -66,8 +67,8 @@ export async function validateSession(sessionId: string) {
 	return { session, user };
 }
 
-export function setSessionTokenCookie(event: RequestEvent, sessionId: string, expiresAt: Date): void {
-	event.cookies.set(sessionCookieName, sessionId, {
+export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
+	event.cookies.set(sessionCookieName, token, {
 		httpOnly: true,
 		path: "/",
 		secure: !dev,

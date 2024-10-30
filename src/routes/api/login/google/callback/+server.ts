@@ -2,7 +2,7 @@ import { google } from "$lib/server/oauth";
 import type { RequestEvent } from "./$types";
 import type { OAuth2Tokens } from "arctic";
 import { createProviderAccount, findUserByProvider } from "$lib/features/user/queries";
-import { createSession, setSessionTokenCookie } from "$lib/server/auth";
+import { createSession, generateSessionToken, setSessionTokenCookie } from "$lib/server/auth";
 
 interface GoogleUser {
   sub: string;
@@ -55,8 +55,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
     });
 
 	if (existingUser !== null) {
-		const session = await createSession(existingUser.id);
-		setSessionTokenCookie(event, session.id, session.expiresAt);
+		const token = generateSessionToken();
+		const session = await createSession(token, existingUser.id);
+		setSessionTokenCookie(event, token, session.expiresAt);
 		return new Response(null, {
 			status: 302,
 			headers: {
@@ -72,8 +73,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
         email: userResult.email,
     });
 
-	const session = await createSession(user.id);
-	setSessionTokenCookie(event, session.id, session.expiresAt);
+	const token = generateSessionToken();
+	const session = await createSession(token, user.id);
+	setSessionTokenCookie(event, token, session.expiresAt);
 
 	return new Response(null, {
 		status: 302,
