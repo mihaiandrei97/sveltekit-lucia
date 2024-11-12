@@ -10,6 +10,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"db:push": "drizzle-kit push",
 		"db:migrate": "drizzle-kit migrate",
+		"db:generate": "drizzle-kit generate",
 		"db:studio": "drizzle-kit studio",
 		"lint": "eslint . && prettier --check .",
 		"format": "prettier --write ."
@@ -36,6 +37,7 @@
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@paralleldrive/cuid2": "^2.2.2",
+		"@types/node": "^22.9.0",
 		"arctic": "^2.2.2",
 		"drizzle-orm": "^0.36.1",
 		"postgres": "^3.4.5"
