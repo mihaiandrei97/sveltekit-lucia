@@ -26,7 +26,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 			status: 400
 		});
 	}
-	
+
 	if (storedState !== state) {
 		return new Response('Please restart the process.', {
 			status: 400
@@ -37,7 +37,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	try {
 		tokens = await github.validateAuthorizationCode(code);
 	} catch (e) {
-        console.log(e);
+		console.log(e);
 		return new Response('Please restart the process.', {
 			status: 400
 		});
@@ -51,9 +51,9 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	const userResult: GitHubUser = await userResponse.json();
 
 	const existingUser = await findUserByProvider({
-        providerId: userResult.id.toString(),
-        providerName: 'github'
-    });
+		providerId: userResult.id.toString(),
+		providerName: 'github'
+	});
 
 	if (existingUser !== null) {
 		const token = generateSessionToken();
@@ -79,8 +79,7 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		});
 	}
 
-	const email =
-		emailListResult.find((email) => email.primary && email.verified)?.email || null;
+	const email = emailListResult.find((email) => email.primary && email.verified)?.email || null;
 
 	if (email === null) {
 		return new Response('Please verify your GitHub email address.', {
@@ -89,17 +88,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 	}
 
 	const user = await createProviderAccount({
-        providerId: userResult.id.toString(),
-        providerName: 'github',
-        username: userResult.login,
-        email
-    });
+		providerId: userResult.id.toString(),
+		providerName: 'github',
+		username: userResult.login,
+		email
+	});
 
-	
 	const token = generateSessionToken();
 	const session = await createSession(token, user.id);
 	setSessionTokenCookie(event, token, session.expiresAt);
-	
+
 	return new Response(null, {
 		status: 302,
 		headers: {

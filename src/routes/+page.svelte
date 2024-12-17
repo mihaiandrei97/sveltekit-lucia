@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageData } from './$types';
+	import Grid from './Grid.svelte';
 
 	let { data }: { data: PageData } = $props();
 	let loading = $state(false);
@@ -10,6 +11,7 @@
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
 <h1>Hi, {data.user.username}!</h1>
 
+<a href="/grid"> Grid </a>
 <form
 	method="post"
 	action="?/logout"
@@ -22,6 +24,6 @@
 	}}
 >
 	<button>
-		{loading ?  "Logging out..." : "Logout"}
+		{loading ? 'Logging out...' : 'Logout'}
 	</button>
 </form>

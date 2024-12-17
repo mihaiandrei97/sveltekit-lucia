@@ -43,7 +43,7 @@ export async function validateSession(token: string) {
 		.from(table.session)
 		.innerJoin(table.user, eq(table.session.userId, table.user.id))
 		.where(eq(table.session.id, sessionId));
-	
+
 	if (!result) {
 		return { session: null, user: null };
 	}
@@ -70,19 +70,19 @@ export async function validateSession(token: string) {
 export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
 	event.cookies.set(sessionCookieName, token, {
 		httpOnly: true,
-		path: "/",
+		path: '/',
 		secure: !dev,
-		sameSite: "lax",
+		sameSite: 'lax',
 		expires: expiresAt
 	});
 }
 
 export function deleteSessionTokenCookie(event: RequestEvent): void {
-	event.cookies.set(sessionCookieName, "", {
+	event.cookies.set(sessionCookieName, '', {
 		httpOnly: true,
-		path: "/",
+		path: '/',
 		secure: !dev,
-		sameSite: "lax",
+		sameSite: 'lax',
 		maxAge: 0
 	});
 }

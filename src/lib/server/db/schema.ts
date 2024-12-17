@@ -1,38 +1,38 @@
-import { pgTable, text, timestamp, unique } from 'drizzle-orm/pg-core';
+import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
 
 type Role = 'ADMIN' | 'USER';
 
 const timestamps = {
-	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).defaultNow().notNull(),
-	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date', precision: 3 }).$onUpdate(
-		() => new Date()
-	)
+	createdAt: integer({ mode: 'timestamp' }).$default(() => new Date()),
+	updatedAt: integer({ mode: 'timestamp' })
+		.$default(() => new Date())
+		.$onUpdate(() => new Date())
 };
 
-export const user = pgTable('user', {
-	id: text('id').primaryKey(),
-	email: text('email').notNull().unique(),
-	role: text('role').$type<Role>().notNull().default('USER'),
-	username: text('username').notNull().unique(),
+export const user = sqliteTable('user', {
+	id: text().primaryKey(),
+	email: text().notNull().unique(),
+	role: text().$type<Role>().notNull().default('USER'),
+	username: text().notNull().unique(),
 	...timestamps
 });
 
-export const session = pgTable('session', {
-	id: text('id').primaryKey(),
-	userId: text('user_id')
+export const session = sqliteTable('session', {
+	id: text().primaryKey(),
+	userId: text()
 		.notNull()
 		.references(() => user.id),
-	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+	expiresAt: integer({ mode: 'timestamp' }).notNull(),
 	...timestamps
 });
 
-export const account = pgTable(
+export const account = sqliteTable(
 	'account',
 	{
-		id: text('id').primaryKey(),
-		providerName: text('provider_name').notNull(),
-		providerId: text('provider_id').notNull(),
-		userId: text('user_id')
+		id: text().primaryKey(),
+		providerName: text().notNull(),
+		providerId: text().notNull(),
+		userId: text()
 			.notNull()
 			.references(() => user.id),
 		...timestamps
